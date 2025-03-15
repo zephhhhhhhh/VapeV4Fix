@@ -20,7 +20,7 @@
 1. Download the specific scripting utility of your choice.
 2. Execute the provided loadstring below.
 ```luau
-https://raw.githubusercontent.com/zephhhhhhhh/VapeV4Fix/refs/heads/main/NewMainScript.lua
+loadstring(game:HttpGet("https://raw.githubusercontent.com/zephhhhhhhh/VapeV4Fix/refs/heads/main/NewMainScript.lua", true))()
 ```
 
 ## Possible Issues
