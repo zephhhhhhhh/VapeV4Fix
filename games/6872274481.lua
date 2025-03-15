@@ -72,7 +72,7 @@ local TrapDisabler
 local AntiFallPart
 local bedwars, remotes, sides, oldinvrender = {}, {}, {}
 
---[[local function addBlur(parent)
+local function addBlur(parent)
 	local blur = Instance.new('ImageLabel')
 	blur.Name = 'Blur'
 	blur.Size = UDim2.new(1, 89, 1, 52)
@@ -83,7 +83,7 @@ local bedwars, remotes, sides, oldinvrender = {}, {}, {}
 	blur.SliceCenter = Rect.new(52, 31, 261, 502)
 	blur.Parent = parent
 	return blur
-end]]
+end
 
 local function collection(tags, module, customadd, customremove)
 	tags = typeof(tags) ~= 'table' and {tags} or tags
