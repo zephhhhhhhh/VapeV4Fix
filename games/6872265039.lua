@@ -30,7 +30,7 @@ run(function()
 	if not debug.getupvalue(Knit.Start, 1) then
 		repeat task.wait() until debug.getupvalue(Knit.Start, 1)
 	end
-	local Flamework = require(replicatedStorage['rbxts_include']['node_modules']['@flamework'].core.out).Flamework
+	-- local Flamework = require(replicatedStorage['rbxts_include']['node_modules']['@flamework'].core.out).Flamework
 	local Client = require(replicatedStorage.TS.remotes).default.Client
 
 	bedwars = setmetatable({
