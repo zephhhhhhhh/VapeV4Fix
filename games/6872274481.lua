@@ -406,7 +406,6 @@ end
 
 local kitorder = {
 	hannah = 5,
-	spirit_assassin = 4,
 	dasher = 3,
 	jade = 2,
 	regent = 1
@@ -651,7 +650,6 @@ run(function()
 		repeat task.wait() until debug.getupvalue(Knit.Start, 1)
 	end
 
-	local Flamework = require(replicatedStorage['rbxts_include']['node_modules']['@flamework'].core.out).Flamework
 	local InventoryUtil = require(replicatedStorage.TS.inventory['inventory-util']).InventoryUtil
 	local Client = require(replicatedStorage.TS.remotes).default.Client
 	local OldGet, OldBreak = Client.Get
@@ -3347,7 +3345,6 @@ run(function()
 		melody = 'guitar',
 		barbarian = 'rageblade',
 		gingerbread_man = 'gumdrop_bounce_pad',
-		spirit_catcher = 'spirit',
 		fisherman = 'fishing_rod',
 		oil_man = 'oil_consumable',
 		santa = 'tnt',
@@ -4112,11 +4109,6 @@ run(function()
 					bedwars.Client:Get(remotes.DepositPinata):CallServer(v)
 				end
 			end, 6, true)
-		end,
-		spirit_assassin = function()
-			kitCollection('EvelynnSoul', function(v)
-				bedwars.SpiritAssassinController:useSpirit(lplr, v)
-			end, 120, true)
 		end,
 		star_collector = function()
 			kitCollection('stars', function(v)
