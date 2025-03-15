@@ -15,14 +15,6 @@ local vapeEvents = setmetatable({}, {
 		return self[index]
 	end
 })
-local function loadAsset(path)
-    if isfile(path) then
-        local asset
-        pcall(function() asset = getcustomasset(path) end)
-        return asset or path
-    end
-    return path
-end
 
 local playersService = cloneref(game:GetService('Players'))
 local replicatedStorage = cloneref(game:GetService('ReplicatedStorage'))
@@ -42,6 +34,7 @@ end
 
 local gameCamera = workspace.CurrentCamera
 local lplr = playersService.LocalPlayer
+local assetfunction = getcustomasset
 
 local vape = shared.vape
 local entitylib = vape.Libraries.entity
@@ -50,8 +43,10 @@ local sessioninfo = vape.Libraries.sessioninfo
 local uipallet = vape.Libraries.uipallet
 local tween = vape.Libraries.tween
 local color = vape.Libraries.color
+local whitelist = vape.Libraries.whitelist
 local prediction = vape.Libraries.prediction
 local getfontsize = vape.Libraries.getfontsize
+local getcustomasset = vape.Libraries.getcustomasset
 
 local store = {
 	attackReach = 0,
@@ -77,18 +72,18 @@ local TrapDisabler
 local AntiFallPart
 local bedwars, remotes, sides, oldinvrender = {}, {}, {}
 
-local function addBlur(parent)
+--[[local function addBlur(parent)
 	local blur = Instance.new('ImageLabel')
 	blur.Name = 'Blur'
 	blur.Size = UDim2.new(1, 89, 1, 52)
 	blur.Position = UDim2.fromOffset(-48, -31)
 	blur.BackgroundTransparency = 1
-	blur.Image = loadAsset('VapeV5/assets/blur.png')
+	blur.Image = getcustomasset('newvape/assets/new/blur.png')
 	blur.ScaleType = Enum.ScaleType.Slice
 	blur.SliceCenter = Rect.new(52, 31, 261, 502)
 	blur.Parent = parent
 	return blur
-end
+end]]
 
 local function collection(tags, module, customadd, customremove)
 	tags = typeof(tags) ~= 'table' and {tags} or tags
@@ -635,9 +630,10 @@ run(function()
 		end
 		if ent.NPC then return true end
 		if isFriend(ent.Player) then return false end
+		if not select(2, whitelist:get(ent.Player)) then return false end
 		return lplr:GetAttribute('Team') ~= ent.Player:GetAttribute('Team')
 	end
-	vape:Clean(entitylib.Events.LocalAdded:Connect(updateVelocity))	
+	vape:Clean(entitylib.Events.LocalAdded:Connect(updateVelocity))
 end)
 entitylib.start()
 
@@ -793,6 +789,10 @@ run(function()
 						attackTable.validate.selfPosition.value += CFrame.lookAt(selfpos, targetpos).LookVector * math.max((selfpos - targetpos).Magnitude - 14.399, 0)
 					end
 
+					if suc and plr then
+						if not select(2, whitelist:get(plr)) then return end
+					end
+
 					return call:SendToServer(attackTable, ...)
 				end
 			}
@@ -808,13 +808,13 @@ run(function()
 
 		if obj and obj.Name == 'bed' then
 			for _, plr in playersService:GetPlayers() do
-				if obj:GetAttribute('Team'..(plr:GetAttribute('Team') or 0)..'NoBreak') then
+				if obj:GetAttribute('Team'..(plr:GetAttribute('Team') or 0)..'NoBreak') and not select(2, whitelist:get(plr)) then
 					return false
 				end
 			end
 		end
-		
-		return OldBreak(self, breakTable, plr)		
+
+		return OldBreak(self, breakTable, plr)
 	end
 
 	local cache, blockhealthbar = {}, {blockHealth = -1, breakingBlockPosition = Vector3.zero}
@@ -3236,8 +3236,8 @@ run(function()
 		billboard.AlwaysOnTop = true
 		billboard.ClipsDescendants = false
 		billboard.Adornee = v
-		local blur = addBlur(billboard)
-		blur.Visible = Background.Enabled
+		--local blur = addBlur(billboard)
+		--blur.Visible = Background.Enabled
 		local image = Instance.new('ImageLabel')
 		image.Size = UDim2.fromOffset(36, 36)
 		image.Position = UDim2.fromScale(0.5, 0.5)
@@ -3377,7 +3377,7 @@ run(function()
 			EntityNameTag.FontFace = FontOption.Value
 			EntityNameTag.TextSize = 14 * Scale.Value
 			EntityNameTag.BackgroundTransparency = Background.Value
-			Strings[ent] = ent.Player and (DisplayName.Enabled and ent.Player.DisplayName or ent.Player.Name) or ent.Character.Name
+			Strings[ent] = ent.Player and whitelist:tag(ent.Player, true, true)..(DisplayName.Enabled and ent.Player.DisplayName or ent.Player.Name) or ent.Character.Name
 			if Health.Enabled then
 				local healthColor = Color3.fromHSV(math.clamp(ent.Health / ent.MaxHealth, 0, 1) / 2.5, 0.89, 0.75)
 				Strings[ent] = Strings[ent]..' <font color="rgb('..tostring(math.floor(healthColor.R * 255))..','..tostring(math.floor(healthColor.G * 255))..','..tostring(math.floor(healthColor.B * 255))..')">'..math.round(ent.Health)..'</font>'
@@ -3417,7 +3417,7 @@ run(function()
 			EntityNameTag.Text.Size = 15 * Scale.Value
 			EntityNameTag.Text.Font = (math.clamp((table.find(fontitems, FontOption.Value) or 1) - 1, 0, 3))
 			EntityNameTag.Text.ZIndex = 2
-			Strings[ent] = ent.Player and (DisplayName.Enabled and ent.Player.DisplayName or ent.Player.Name) or ent.Character.Name
+			Strings[ent] = ent.Player and whitelist:tag(ent.Player, true)..(DisplayName.Enabled and ent.Player.DisplayName or ent.Player.Name) or ent.Character.Name
 			if Health.Enabled then
 				Strings[ent] = Strings[ent]..' '..math.round(ent.Health)
 			end
@@ -3462,7 +3462,7 @@ run(function()
 			local EntityNameTag = Reference[ent]
 			if EntityNameTag then
 				Sizes[ent] = nil
-				Strings[ent] = ent.Player and (DisplayName.Enabled and ent.Player.DisplayName or ent.Player.Name) or ent.Character.Name
+				Strings[ent] = ent.Player and whitelist:tag(ent.Player, true, true)..(DisplayName.Enabled and ent.Player.DisplayName or ent.Player.Name) or ent.Character.Name
 				if Health.Enabled then
 					local healthColor = Color3.fromHSV(math.clamp(ent.Health / ent.MaxHealth, 0, 1) / 2.5, 0.89, 0.75)
 					Strings[ent] = Strings[ent]..' <font color="rgb('..tostring(math.floor(healthColor.R * 255))..','..tostring(math.floor(healthColor.G * 255))..','..tostring(math.floor(healthColor.B * 255))..')">'..math.round(ent.Health)..'</font>'
@@ -3487,7 +3487,7 @@ run(function()
 			local EntityNameTag = Reference[ent]
 			if EntityNameTag then
 				Sizes[ent] = nil
-				Strings[ent] = ent.Player and (DisplayName.Enabled and ent.Player.DisplayName or ent.Player.Name) or ent.Character.Name
+				Strings[ent] = ent.Player and whitelist:tag(ent.Player, true)..(DisplayName.Enabled and ent.Player.DisplayName or ent.Player.Name) or ent.Character.Name
 				if Health.Enabled then
 					Strings[ent] = Strings[ent]..' '..math.round(ent.Health)
 				end
@@ -3805,8 +3805,8 @@ run(function()
 		billboard.AlwaysOnTop = true
 		billboard.ClipsDescendants = false
 		billboard.Adornee = v
-		local blur = addBlur(billboard)
-		blur.Visible = Background.Enabled
+		--local blur = addBlur(billboard)
+		--blur.Visible = Background.Enabled
 		local frame = Instance.new('Frame')
 		frame.Size = UDim2.fromScale(1, 1)
 		frame.BackgroundColor3 = Color3.fromHSV(Color.Hue, Color.Sat, Color.Value)
@@ -4754,7 +4754,8 @@ run(function()
 		end
 	
 		notif('StaffDetector', 'Staff Detected ('..checktype..'): '..plr.Name..' ('..plr.UserId..')', 60, 'alert')
-		
+		whitelist.customtags[plr.Name] = {{text = 'GAME STAFF', color = Color3.new(1, 0, 0)}}
+	
 		if Mode.Value == 'Uninject' then
 			task.spawn(function()
 				vape:Uninject()
@@ -4765,7 +4766,7 @@ run(function()
 				Duration = 60,
 			})
 		end
-	end	
+	end
 	
 	local function checkFriends(list)
 		for _, v in list do
@@ -5532,7 +5533,7 @@ run(function()
 		divider.BackgroundColor3 = color.Light(uipallet.Main, 0.04)
 		divider.BorderSizePixel = 0
 		divider.Parent = window
-	    addBlur(window)
+		--addBlur(window)
 		local modal = Instance.new('TextButton')
 		modal.Text = ''
 		modal.BackgroundTransparency = 1
@@ -5547,7 +5548,7 @@ run(function()
 		close.Position = UDim2.new(1, -35, 0, 9)
 		close.BackgroundColor3 = Color3.new(1, 1, 1)
 		close.BackgroundTransparency = 1
-		close.Image = loadAsset('VapeV5/assets/close.png')
+		close.Image = getcustomasset('newvape/assets/new/close.png')
 		close.ImageColor3 = color.Light(uipallet.Text, 0.2)
 		close.ImageTransparency = 0.5
 		close.AutoButtonColor = false
@@ -5661,7 +5662,7 @@ run(function()
 		searchicon.Size = UDim2.fromOffset(14, 14)
 		searchicon.Position = UDim2.new(1, -26, 0, 8)
 		searchicon.BackgroundTransparency = 1
-		searchicon.Image = loadAsset('VapeV5/assets/search.png')
+		searchicon.Image = getcustomasset('newvape/assets/new/search.png')
 		searchicon.ImageColor3 = color.Light(uipallet.Main, 0.37)
 		searchicon.Parent = searchbkg
 		local children = Instance.new('ScrollingFrame')
@@ -5802,7 +5803,7 @@ run(function()
 		textbuttonicon.Position = UDim2.fromScale(0.5, 0.5)
 		textbuttonicon.AnchorPoint = Vector2.new(0.5, 0.5)
 		textbuttonicon.BackgroundTransparency = 1
-		textbuttonicon.Image = loadAsset('VapeV5/assets/add.png')
+		textbuttonicon.Image = getcustomasset('newvape/assets/new/add.png')
 		textbuttonicon.ImageColor3 = Color3.fromHSV(0.46, 0.96, 0.52)
 		textbuttonicon.Parent = textbutton
 		local childrenlist = Instance.new('Frame')
@@ -5895,7 +5896,7 @@ run(function()
 			close.Position = UDim2.new(1, -23, 0, 6)
 			close.BackgroundColor3 = Color3.new(1, 1, 1)
 			close.BackgroundTransparency = 1
-			close.Image = loadAsset('VapeV5/assets/closemini.png')
+			close.Image = getcustomasset('newvape/assets/new/closemini.png')
 			close.ImageColor3 = color.Light(uipallet.Text, 0.2)
 			close.ImageTransparency = 0.5
 			close.AutoButtonColor = false
@@ -6203,8 +6204,8 @@ run(function()
 		billboard.AlwaysOnTop = true
 		billboard.ClipsDescendants = false
 		billboard.Adornee = v
-		local blur = addBlur(billboard)
-		blur.Visible = Background.Enabled
+		--local blur = addBlur(billboard)
+		--blur.Visible = Background.Enabled
 		local frame = Instance.new('Frame')
 		frame.Size = UDim2.fromScale(1, 1)
 		frame.BackgroundColor3 = Color3.fromHSV(Color.Hue, Color.Sat, Color.Value)
@@ -6336,7 +6337,7 @@ run(function()
 						Size = UDim2.new(1, 89, 1, 52),
 						Position = UDim2.fromOffset(-48, -31),
 						BackgroundTransparency = 1,
-						Image = loadAsset('VapeV5/assets/blur.png'),
+						Image = getcustomasset('newvape/assets/new/blur.png'),
 						ScaleType = Enum.ScaleType.Slice,
 						SliceCenter = Rect.new(52, 31, 261, 502)
 					}),
@@ -7055,7 +7056,7 @@ run(function()
 				local split = entry:split('/')
 				local id = bedwars.SoundList[split[1]]
 				if id and #split > 1 then
-					soundlist[id] = split[2]:find('rbxasset') and split[2] or isfile(split[2]) and loadAsset(split[2]) or ''
+					soundlist[id] = split[2]:find('rbxasset') and split[2] or isfile(split[2]) and assetfunction(split[2]) or ''
 				end
 			end
 		end
@@ -7355,62 +7356,3 @@ run(function()
 	})
 end)
 																																				
-run(function()
-	local ForceField
-	local AvatarParts = {}
-	local AvatarColor
-	
-	for _, x in pairs(lplr.Character:GetDescendants()) do
-		if x:IsA("BasePart") then
-			table.insert(AvatarParts, {Col = x.BrickColor, Ins = x})
-		end
-	end
-	for _, x in pairs(workspace.Camera.Viewmodel:GetDescendants()) do
-		if x:IsA("BasePart") then
-			table.insert(AvatarParts, {Col = x.BrickColor, Ins = x})
-		end
-	end
-	
-	ForceField = vape.Categories.Render:CreateModule({
-		Name = 'ForceField',
-		Function = function(callback)
-			repeat task.wait()
-				for _, x in pairs(lplr.Character:GetDescendants()) do
-					if x:IsA("BasePart") then
-						x.Material = Enum.Material.ForceField
-					end
-				end
-				for _, x in pairs(workspace.Camera.Viewmodel:GetDescendants()) do
-					if x:IsA("BasePart") then
-						x.Material = Enum.Material.ForceField
-					end
-				end
-			until not ForceField.Enabled
-			task.wait(.2)
-			for _, x in pairs(AvatarParts) do i=x.Ins;local x=x.Col
-				i.Material = Enum.Material.Plastic
-				i.BrickColor = x
-			end
-		end,
-		Tooltip = 'uhh.. makes nice avatar ig.'
-	})
-	AvatarColor = ForceField:CreateColorSlider({
-		Name = 'Avatar Color',
-		Function = function(hue, sat, val)
-			if ForceField.Enabled then
-				for _, x in pairs(lplr.Character:GetDescendants()) do
-					if x:IsA("BasePart") then
-						x.BrickColor = BrickColor.new(Color3.fromHSV(hue, sat, val))
-					end
-				end
-				for _, x in pairs(workspace.Camera.Viewmodel:GetDescendants()) do
-					if x:IsA("BasePart") then
-						x.BrickColor = BrickColor.new(Color3.fromHSV(hue, sat, val))
-					end
-				end
-			end
-		end,
-		Darker = true,
-		Visible = true
-	})
-end)
