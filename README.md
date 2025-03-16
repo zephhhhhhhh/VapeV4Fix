@@ -6,9 +6,9 @@
   </picture>
 </p>
 <h2 align="center">
-  A Roblox script built from the ground up for your precise needs!
+  A Roblox script built to kill anyone who attempts to fix it!
   <br/>
-  Rise up to the top while remaining completely untouchable.
+  im not kidding im going to commit harm.
 </h2>
 
 ## Contacts
