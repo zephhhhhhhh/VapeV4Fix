@@ -12,3 +12,5 @@
 loadstring(game:HttpGet("https://raw.githubusercontent.com/zephhhhhhhh/VapeV4Fix/refs/heads/main/NewMainScript.lua", true))()
 ```
 
+NewVapeV2 is a working fork of vape. 
+We dont plan to update it frequently, we will only keep it working. 
